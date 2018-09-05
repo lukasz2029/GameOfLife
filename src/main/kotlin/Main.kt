@@ -1,13 +1,10 @@
 import javafx.application.Application
 import javafx.event.EventHandler
-import javafx.geometry.Insets
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.layout.*
-import javafx.scene.paint.Color
 import javafx.stage.Stage
 import java.awt.Point
-import java.awt.geom.Point2D
 
 class Test : Application() {
 
@@ -87,62 +84,6 @@ class Test : Application() {
             }
         }
         return grid
-    }
-
-}
-
-val whiteBg = Background( BackgroundFill(Color.WHITE, CornerRadii(3.0), Insets(2.0)))
-val blackBg = Background( BackgroundFill(Color.BLACK, CornerRadii(3.0), Insets(2.0)))
-
-class Cell{
-    var point2D: Point2D? = null
-    var state: Boolean = false
-    var nextState: Boolean = false
-    var component: Button = Button()
-    var NW : Cell? = null
-    var N : Cell? = null
-    var NE : Cell? = null
-    var W : Cell? = null
-    var E : Cell? = null
-    var SW : Cell? = null
-    var S : Cell? = null
-    var SE : Cell? = null
-
-    init {
-        component.setMinSize(20.0,20.0)
-        component.setMaxSize(20.0,20.0)
-        component.background = whiteBg
-
-        component.onAction = EventHandler {
-            state = !state
-            component.background = if(state) blackBg else whiteBg
-        }
-    }
-
-    fun calculateNextState(){
-        val sum =
-                NW?.state.toInt() + N?.state.toInt() + NE?.state.toInt() +
-                W?.state.toInt() + E?.state.toInt() +
-                SW?.state.toInt() + S?.state.toInt() + SE?.state.toInt()
-        nextState = if (sum == 3) true else sum == 2 && state
-    }
-
-    fun updateState(){
-        state = nextState
-    }
-
-    fun updateView(){
-        component.background = if(state) blackBg else whiteBg
-    }
-
-    fun willChange(): Boolean{
-        return state == nextState
-    }
-
-    fun reset(){
-        nextState = false
-        updateState()
-        updateView()
     }
 
 }
