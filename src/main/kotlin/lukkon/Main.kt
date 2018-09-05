@@ -1,26 +1,28 @@
+package lukkon
+
 import javafx.application.Application
 import javafx.event.EventHandler
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.layout.*
 import javafx.stage.Stage
-import java.awt.Point
+import lukkon.Utils.getCellArray
+import lukkon.Utils.getGridPane
 
-class Test : Application() {
+class GameOfLife : Application() {
 
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            launch(Test::class.java)
+            launch(GameOfLife::class.java)
         }
     }
 
     override fun start(stage: Stage) {
         val x = 50
         val y = 50
-        val cellArray = Array(x) { _ -> Array(y) {Cell()} }
+        val cellArray  = getCellArray(x, y)
 
-        val grid = getGrid(x, y, cellArray)
         val startBtn = Button("Start")
         startBtn.onAction = EventHandler{ _ ->
             cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
@@ -48,43 +50,16 @@ class Test : Application() {
             }
             cellArray.forEach { array -> array.forEach {it.updateView()} }
         }
+
         val btnHBox = HBox(startBtn, skipBtn, resetBtn)
-        val vbox = VBox(btnHBox, grid)
+        val vBox = VBox(btnHBox, getGridPane(cellArray))
         val pane = Pane()
-        pane.children.add(vbox)
+        pane.children.add(vBox)
         val scene = Scene(pane,200.0,200.0)
         stage.scene = scene
         stage.show()
     }
 
-    fun getGrid(width: Int, height: Int, cellArray: Array<Array<Cell>>): GridPane{
-        val grid = GridPane()
-        for (y in 0 until height){
-            for (x in 0 until width){
-                val cell = Cell()
-                grid.add(cell.component, x, y)
-                cellArray[x][y] = cell
-                cell.point2D = Point(x, y)
-                if (x > 0){
-                    cell.W = cellArray[x - 1][y]
-                    cellArray[x - 1][y].E = cell
-                }
-                if (y > 0){
-                    cell.N = cellArray[x][y - 1]
-                    cellArray[x][y - 1].S = cell
-                    if (x > 0){
-                        cell.NW = cellArray[x - 1][y - 1]
-                        cellArray[x - 1][y - 1].SE = cell
-                    }
-                    if (x < width - 1){
-                        cell.NE = cellArray[x + 1][y - 1]
-                        cellArray[x + 1][y - 1].SW = cell
-                    }
-                }
-            }
-        }
-        return grid
-    }
 
 }
 
