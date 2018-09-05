@@ -27,13 +27,31 @@ class Test : Application() {
         val startBtn = Button("Start")
         startBtn.onAction = EventHandler{ _ ->
             cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
-            cellArray.forEach { array -> array.forEach { it.updateState() } }
+            cellArray.forEach { array -> array.forEach {
+                it.updateState()
+                it.updateView()
+            } }
         }
         val resetBtn = Button("Reset")
         resetBtn.onAction = EventHandler{ _ ->
             cellArray.forEach { array -> array.forEach { it.reset() } }
         }
-        val btnHBox = HBox(startBtn, resetBtn)
+        val skipBtn = Button("Skip 10")
+        skipBtn.onAction = EventHandler { _ ->
+            var changed = true
+            var counter = 0
+            while (changed && counter < 10){
+                changed = false
+                cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+                cellArray.forEach { array -> array.forEach {
+                    if (!changed) changed = changed || it.willChange()
+                    it.updateState()
+                } }
+                counter++
+            }
+            cellArray.forEach { array -> array.forEach {it.updateView()} }
+        }
+        val btnHBox = HBox(startBtn, skipBtn, resetBtn)
         val vbox = VBox(btnHBox, grid)
         val pane = Pane()
         pane.children.add(vbox)
@@ -80,7 +98,7 @@ class Cell{
     var point2D: Point2D? = null
     var state: Boolean = false
     var nextState: Boolean = false
-    var component: Button
+    var component: Button = Button()
     var NW : Cell? = null
     var N : Cell? = null
     var NE : Cell? = null
@@ -91,11 +109,10 @@ class Cell{
     var SE : Cell? = null
 
     init {
-        component = Button()
         component.setMinSize(20.0,20.0)
         component.setMaxSize(20.0,20.0)
         component.background = whiteBg
-        
+
         component.onAction = EventHandler {
             state = !state
             component.background = if(state) blackBg else whiteBg
@@ -112,12 +129,20 @@ class Cell{
 
     fun updateState(){
         state = nextState
+    }
+
+    fun updateView(){
         component.background = if(state) blackBg else whiteBg
+    }
+
+    fun willChange(): Boolean{
+        return state == nextState
     }
 
     fun reset(){
         nextState = false
         updateState()
+        updateView()
     }
 
 }
