@@ -14,6 +14,8 @@ class Cell{
     companion object {
         val whiteBg = Background( BackgroundFill(Color.WHITE, CornerRadii(3.0), Insets(2.0)))
         val blackBg = Background( BackgroundFill(Color.BLACK, CornerRadii(3.0), Insets(2.0)))
+        var bornSet: Set<Short> = setOf(3)
+        var surviveSet: Set<Short> = setOf(2, 3)
     }
 
     var point2D: Point2D? = null
@@ -42,10 +44,10 @@ class Cell{
 
     fun calculateNextState(){
         val sum =
-                NW?.state.toInt() + N?.state.toInt() + NE?.state.toInt() +
+                (NW?.state.toInt() + N?.state.toInt() + NE?.state.toInt() +
                 W?.state.toInt() + E?.state.toInt() +
-                SW?.state.toInt() + S?.state.toInt() + SE?.state.toInt()
-        nextState = if (sum == 3) true else sum == 2 && state
+                SW?.state.toInt() + S?.state.toInt() + SE?.state.toInt()).toShort()
+        nextState = (!state && bornSet.contains(sum)) || (state && surviveSet.contains(sum))
     }
 
     fun updateState(){
