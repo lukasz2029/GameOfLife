@@ -59,7 +59,7 @@ class Cell{
     }
 
     fun willChange(): Boolean{
-        return state == nextState
+        return state != nextState
     }
 
     fun reset(){
@@ -69,4 +69,5 @@ class Cell{
     }
 
     private fun Boolean?.toInt() = if (this == true) 1 else 0
+
 }
