@@ -22,14 +22,14 @@ class Cell{
     var state: Boolean = false
     var nextState: Boolean = false
     var component: Button = Button()
-    var NW : Cell? = null
-    var N : Cell? = null
-    var NE : Cell? = null
-    var W : Cell? = null
-    var E : Cell? = null
-    var SW : Cell? = null
-    var S : Cell? = null
-    var SE : Cell? = null
+    var NW: Cell? = null
+    var N: Cell? = null
+    var NE: Cell? = null
+    var W: Cell? = null
+    var E: Cell? = null
+    var SW: Cell? = null
+    var S: Cell? = null
+    var SE: Cell? = null
 
     init {
         component.setMinSize(20.0,20.0)

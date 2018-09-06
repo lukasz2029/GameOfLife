@@ -24,8 +24,8 @@ class GameOfLife : Application() {
     }
 
     override fun start(stage: Stage) {
-        val x = 50
-        val y = 50
+        val x = 100
+        val y = 100
         val cellArray  = getCellArray(x, y)
 
         val nextBtn = Button("Next")
@@ -93,6 +93,7 @@ class GameOfLife : Application() {
         mainPane.top = hbox
         val scene = Scene(mainPane,500.0,300.0)
         stage.scene = scene
+        stage.title = "The game of life"
         stage.show()
     }
 
