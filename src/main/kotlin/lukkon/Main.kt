@@ -4,6 +4,7 @@ import javafx.application.Application
 import javafx.event.EventHandler
 import javafx.scene.Scene
 import javafx.scene.control.Button
+import javafx.scene.control.ScrollPane
 import javafx.scene.layout.*
 import javafx.stage.Stage
 import lukkon.Utils.getCellArray
@@ -23,8 +24,8 @@ class GameOfLife : Application() {
         val y = 50
         val cellArray  = getCellArray(x, y)
 
-        val startBtn = Button("Start")
-        startBtn.onAction = EventHandler{ _ ->
+        val nextBtn = Button("Next")
+        nextBtn.onAction = EventHandler{ _ ->
             cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
             cellArray.forEach { array -> array.forEach {
                 it.updateState()
@@ -51,15 +52,13 @@ class GameOfLife : Application() {
             cellArray.forEach { array -> array.forEach {it.updateView()} }
         }
 
-        val btnHBox = HBox(startBtn, skipBtn, resetBtn)
-        val vBox = VBox(btnHBox, getGridPane(cellArray))
-        val pane = Pane()
-        pane.children.add(vBox)
-        val scene = Scene(pane,200.0,200.0)
+        val mainPane = BorderPane()
+        mainPane.center = ScrollPane(getGridPane(cellArray))
+        mainPane.top = HBox(nextBtn, skipBtn, resetBtn)
+        val scene = Scene(mainPane,200.0,200.0)
         stage.scene = scene
         stage.show()
     }
-
 
 }
 
