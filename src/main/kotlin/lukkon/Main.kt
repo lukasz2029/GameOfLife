@@ -29,32 +29,11 @@ class GameOfLife : Application() {
         val cellArray  = getCellArray(x, y)
 
         val nextBtn = Button("Next")
-        nextBtn.onAction = EventHandler{ _ ->
-            cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
-            cellArray.forEach { array -> array.forEach {
-                it.updateState()
-                it.updateView()
-            } }
-        }
+        nextBtn.onAction = EventHandler{ next(cellArray) }
         val resetBtn = Button("Reset")
-        resetBtn.onAction = EventHandler{ _ ->
-            cellArray.forEach { array -> array.forEach { it.reset() } }
-        }
+        resetBtn.onAction = EventHandler{ reset(cellArray) }
         val skipBtn = Button("Skip 10")
-        skipBtn.onAction = EventHandler { _ ->
-            var changed = true
-            var counter = 0
-            while (changed && counter < 10){
-                changed = false
-                cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
-                cellArray.forEach { array -> array.forEach {
-                    if (!changed) changed = changed || it.willChange()
-                    it.updateState()
-                } }
-                counter++
-            }
-            cellArray.forEach { array -> array.forEach {it.updateView()} }
-        }
+        skipBtn.onAction = EventHandler{ skip(cellArray, 10) }
 
         val rulesRegex = "^(?!.*(.).*\\1)[012345678]*\$".toRegex()
         val bornTextField = TextField("2")
@@ -97,6 +76,32 @@ class GameOfLife : Application() {
         stage.show()
     }
 
+    private fun next(cellArray: Array<Array<Cell>>){
+        cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+        cellArray.forEach { array -> array.forEach {
+            it.updateState()
+            it.updateView()
+        } }
+    }
+
+    private fun skip(cellArray: Array<Array<Cell>>, count: Int){
+        var changed = true
+        var steps = 0
+        while (changed && (steps < count)){
+            changed = false
+            cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+            cellArray.forEach { array -> array.forEach {
+                if (!changed) changed = it.willChange()
+                it.updateState()
+            } }
+            steps++
+        }
+        cellArray.forEach { array -> array.forEach { it.updateView()} }
+    }
+
+    private fun reset(cellArray: Array<Array<Cell>>) {
+        cellArray.forEach { array -> array.forEach { it.reset() } }
+    }
+
 }
 
-fun Boolean?.toInt() = if (this == true) 1 else 0

@@ -68,4 +68,5 @@ class Cell{
         updateView()
     }
 
+    private fun Boolean?.toInt() = if (this == true) 1 else 0
 }
