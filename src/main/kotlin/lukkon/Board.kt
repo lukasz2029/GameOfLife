@@ -3,42 +3,39 @@ package lukkon
 import javafx.scene.canvas.Canvas
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
-import java.awt.Point
 
-class Board(val width: Int,
-            val height: Int,
+class Board(width: Int,
+            height: Int,
             val cellSize: Double = 15.0,
             val spacing: Double = 2.0,
             val arcSize: Double = 2.0) {
 
-    val cellArray = Array<Array<Cell>>(width) { _ -> Array(height){ SimpleCell() } }
+    val cellArray = Array(width) { _ -> Array(height){ SimpleCell() } }
     val canvas = Canvas(width*(cellSize + spacing) + spacing, height*(cellSize + spacing) + spacing)
 
     init {
-        initCellArray()
+        initCellArray(width)
         initCanvas()
     }
 
-    private fun initCellArray(){
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                val cell = cellArray[x][y]
-                cell.location = Point(x, y)
+    private fun initCellArray(width: Int){
+        foreachCellIndexed { x, y, cell ->
+            cell.location.x = x
+            cell.location.y = y
+            if (x > 0) {
+                cell.W = cellArray[x - 1][y]
+                cellArray[x - 1][y].E = cell
+            }
+            if (y > 0) {
+                cell.N = cellArray[x][y - 1]
+                cellArray[x][y - 1].S = cell
                 if (x > 0) {
-                    cell.W = cellArray[x - 1][y]
-                    cellArray[x - 1][y].E = cell
+                    cell.NW = cellArray[x - 1][y - 1]
+                    cellArray[x - 1][y - 1].SE = cell
                 }
-                if (y > 0) {
-                    cell.N = cellArray[x][y - 1]
-                    cellArray[x][y - 1].S = cell
-                    if (x > 0) {
-                        cell.NW = cellArray[x - 1][y - 1]
-                        cellArray[x - 1][y - 1].SE = cell
-                    }
-                    if (x < width - 1) {
-                        cell.NE = cellArray[x + 1][y - 1]
-                        cellArray[x + 1][y - 1].SW = cell
-                    }
+                if (x < width - 1) {
+                    cell.NE = cellArray[x + 1][y - 1]
+                    cellArray[x + 1][y - 1].SW = cell
                 }
             }
         }
@@ -53,7 +50,7 @@ class Board(val width: Int,
                 val y = Math.ceil(it.y/(cellSize + spacing)).toInt() - 1
                 cellArray[x][y].state = !cellArray[x][y].state
                 cellArray[x][y].updateView()
-                gc.fill = (cellArray[x][y] as SimpleCell).color
+                gc.fill = (cellArray[x][y]).color
                 gc.fillRoundRect(
                         x*(cellSize + spacing) + spacing,
                         y*(cellSize + spacing) + spacing,
@@ -61,14 +58,27 @@ class Board(val width: Int,
             }
         }
 
-        for (x: Int in 0 until width){
-            for (y: Int in 0 until height) {
-                val cell = cellArray[x][y] as SimpleCell
-                gc.fill = cell.color
-                gc.fillRoundRect(
-                        x*(cellSize + spacing) + spacing,
-                        y*(cellSize + spacing) + spacing,
-                        cellSize, cellSize, 5.0, 5.0)
+        foreachCellIndexed { x, y, cell ->
+            gc.fill = cell.color
+            gc.fillRoundRect(
+                    x*(cellSize + spacing) + spacing,
+                    y*(cellSize + spacing) + spacing,
+                    cellSize, cellSize, 5.0, 5.0)
+        }
+    }
+
+    inline fun foreachCell(action: (SimpleCell) -> Unit){
+        for (element in cellArray){
+            for (cell in element){
+                action(cell)
+            }
+        }
+    }
+
+    inline fun foreachCellIndexed(action: (x: Int, y: Int, SimpleCell) -> Unit){
+        for ((x, array) in cellArray.withIndex()) {
+            for ((y, cell) in array.withIndex()) {
+                action(x, y, cell)
             }
         }
     }

@@ -9,7 +9,7 @@ abstract class Cell{
         var surviveSet: Set<Short> = setOf(2, 3)
     }
 
-    var location: Point? = null
+    var location: Point = Point()
     var state: Boolean = false
     var nextState: Boolean = false
 

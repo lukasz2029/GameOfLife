@@ -6,7 +6,6 @@ import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Scene
-import javafx.scene.canvas.Canvas
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.ScrollPane
@@ -15,7 +14,6 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
-import java.util.function.Supplier
 
 class GameOfLife : Application() {
 
@@ -90,7 +88,7 @@ class GameOfLife : Application() {
     }
 
     private fun next(board: Board){
-        board.cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+        board.foreachCell { it.calculateNextState() }
         if(updateCells(board)){
             counter.value++
         }
@@ -98,16 +96,16 @@ class GameOfLife : Application() {
 
     private fun skip(board: Board, count: Int){
         var steps = 0
-        board.cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+        board.foreachCell { it.calculateNextState() }
         while ((steps < count) && updateCells(board)){
-            board.cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+            board.foreachCell { it.calculateNextState() }
             steps++
         }
         counter.value += steps
     }
 
     private fun reset(board: Board) {
-        board.cellArray.forEach { array -> array.forEach { it.reset() } }
+        board.foreachCell { it.reset() }
         updateCells(board)
         counter.value = 0
     }
@@ -115,20 +113,18 @@ class GameOfLife : Application() {
     private fun updateCells(board: Board): Boolean{
         var changed = false
         val gc = board.canvas.graphicsContext2D
-        board.cellArray.forEach { col -> col.forEach {cell ->
+        board.foreachCellIndexed { x, y, cell ->
             if (cell.willChange()) {
                 cell.updateState()
                 cell.updateView()
-                val x = cell.location!!.x
-                val y = cell.location!!.y
-                gc.fill = (board.cellArray[x][y] as SimpleCell).color
+                gc.fill = cell.color
                 gc.fillRoundRect(
                         x*(board.cellSize + board.spacing) + board.spacing,
                         y*(board.cellSize + board.spacing) + board.spacing,
                         board.cellSize, board.cellSize, board.arcSize, board.arcSize)
                 changed = true
             }
-        } }
+        }
         return changed
     }
 
