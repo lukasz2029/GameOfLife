@@ -15,8 +15,6 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
-import lukkon.Utils.size
-import lukkon.Utils.spacing
 import java.util.function.Supplier
 
 class GameOfLife : Application() {
@@ -32,18 +30,17 @@ class GameOfLife : Application() {
     override fun start(stage: Stage) {
         val x = 50
         val y = 50
-        val cellArray: Array<Array<Cell>> = Utils.getCellArray(Supplier { SimpleCell() }, x, y)
+        val board = Board(x, y)
 
-        val canvas = Utils.getCanvas(cellArray)
-        val holder = StackPane(canvas)
+        val holder = StackPane(board.canvas)
         holder.style = "-fx-background-color: lightgrey"
 
         val nextBtn = Button("Next")
-        nextBtn.onAction = EventHandler{ next(cellArray, canvas) }
+        nextBtn.onAction = EventHandler{ next(board) }
         val resetBtn = Button("Reset")
-        resetBtn.onAction = EventHandler{ reset(cellArray, canvas) }
+        resetBtn.onAction = EventHandler{ reset(board) }
         val skipBtn = Button("Skip 10")
-        skipBtn.onAction = EventHandler{ skip(cellArray, canvas, 10) }
+        skipBtn.onAction = EventHandler{ skip(board, 10) }
 
         val rulesRegex = "^(?!.*(.).*\\1)[012345678]*\$".toRegex()
         val bornTextField = TextField("2")
@@ -92,43 +89,43 @@ class GameOfLife : Application() {
         stage.show()
     }
 
-    private fun next(cellArray: Array<Array<Cell>>, canvas: Canvas){
-        cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
-        if(updateCells(cellArray, canvas)){
+    private fun next(board: Board){
+        board.cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+        if(updateCells(board)){
             counter.value++
         }
     }
 
-    private fun skip(cellArray: Array<Array<Cell>>, canvas: Canvas, count: Int){
+    private fun skip(board: Board, count: Int){
         var steps = 0
-        cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
-        while ((steps < count) && updateCells(cellArray, canvas)){
-            cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+        board.cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+        while ((steps < count) && updateCells(board)){
+            board.cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
             steps++
         }
         counter.value += steps
     }
 
-    private fun reset(cellArray: Array<Array<Cell>>, canvas: Canvas) {
-        cellArray.forEach { array -> array.forEach { it.reset() } }
-        updateCells(cellArray, canvas)
+    private fun reset(board: Board) {
+        board.cellArray.forEach { array -> array.forEach { it.reset() } }
+        updateCells(board)
         counter.value = 0
     }
 
-    private fun updateCells(cellArray: Array<Array<Cell>>, canvas: Canvas): Boolean{
+    private fun updateCells(board: Board): Boolean{
         var changed = false
-        val gc = canvas.graphicsContext2D
-        cellArray.forEach { col -> col.forEach {cell ->
+        val gc = board.canvas.graphicsContext2D
+        board.cellArray.forEach { col -> col.forEach {cell ->
             if (cell.willChange()) {
                 cell.updateState()
                 cell.updateView()
                 val x = cell.location!!.x
                 val y = cell.location!!.y
-                gc.fill = (cellArray[x][y] as SimpleCell).color
+                gc.fill = (board.cellArray[x][y] as SimpleCell).color
                 gc.fillRoundRect(
-                        x*(size + spacing) + spacing,
-                        y*(size + spacing) + spacing,
-                        size, size, 5.0, 5.0)
+                        x*(board.cellSize + board.spacing) + board.spacing,
+                        y*(board.cellSize + board.spacing) + board.spacing,
+                        board.cellSize, board.cellSize, board.arcSize, board.arcSize)
                 changed = true
             }
         } }

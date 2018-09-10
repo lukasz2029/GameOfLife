@@ -3,18 +3,26 @@ package lukkon
 import javafx.scene.canvas.Canvas
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
-import java.util.function.Supplier
 import java.awt.Point
 
-object Utils {
+class Board(val width: Int,
+            val height: Int,
+            val cellSize: Double = 15.0,
+            val spacing: Double = 2.0,
+            val arcSize: Double = 2.0) {
 
-    fun <E:Cell> getCellArray(supplier : Supplier<E>, width: Int, height: Int): Array<Array<Cell>>{
-        val cellArray = Array<Array<Cell>>(width) { _ -> Array(height){supplier.get()} }
+    val cellArray = Array<Array<Cell>>(width) { _ -> Array(height){ SimpleCell() } }
+    val canvas = Canvas(width*(cellSize + spacing) + spacing, height*(cellSize + spacing) + spacing)
 
+    init {
+        initCellArray()
+        initCanvas()
+    }
+
+    private fun initCellArray(){
         for (y in 0 until height) {
             for (x in 0 until width) {
-                val cell = supplier.get()
-                cellArray[x][y] = cell
+                val cell = cellArray[x][y]
                 cell.location = Point(x, y)
                 if (x > 0) {
                     cell.W = cellArray[x - 1][y]
@@ -34,32 +42,22 @@ object Utils {
                 }
             }
         }
-        return cellArray
     }
 
-    val size = 15.0
-    val spacing = 2.0
-    val arcSize = 5.0
-
-    fun getCanvas(cellArray: Array<Array<Cell>>): Canvas {
-        val width: Int = cellArray.size
-        val height: Int = cellArray.first().size
-
-        val canvas = Canvas(width*(size + spacing) + spacing, height*(size + spacing) + spacing)
+    private fun initCanvas() {
         val gc = canvas.graphicsContext2D
 
         canvas.setOnMouseClicked {
             if (it.eventType == MouseEvent.MOUSE_CLICKED && it.button == MouseButton.PRIMARY){
-                val x = Math.ceil(it.x/(size + spacing)).toInt() - 1
-                val y = Math.ceil(it.y/(size + spacing)).toInt() - 1
-                println("$x, $y")
+                val x = Math.ceil(it.x/(cellSize + spacing)).toInt() - 1
+                val y = Math.ceil(it.y/(cellSize + spacing)).toInt() - 1
                 cellArray[x][y].state = !cellArray[x][y].state
                 cellArray[x][y].updateView()
                 gc.fill = (cellArray[x][y] as SimpleCell).color
                 gc.fillRoundRect(
-                        x*(size + spacing) + spacing,
-                        y*(size + spacing) + spacing,
-                        size, size, arcSize, arcSize)
+                        x*(cellSize + spacing) + spacing,
+                        y*(cellSize + spacing) + spacing,
+                        cellSize, cellSize, arcSize, arcSize)
             }
         }
 
@@ -68,12 +66,11 @@ object Utils {
                 val cell = cellArray[x][y] as SimpleCell
                 gc.fill = cell.color
                 gc.fillRoundRect(
-                        x*(size + spacing) + spacing,
-                        y*(size + spacing) + spacing,
-                        size, size, 5.0, 5.0)
+                        x*(cellSize + spacing) + spacing,
+                        y*(cellSize + spacing) + spacing,
+                        cellSize, cellSize, 5.0, 5.0)
             }
         }
-        return canvas
     }
 
 }
