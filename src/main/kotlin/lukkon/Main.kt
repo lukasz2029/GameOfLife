@@ -12,9 +12,8 @@ import javafx.scene.control.ScrollPane
 import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
+import javafx.scene.layout.StackPane
 import javafx.stage.Stage
-import lukkon.Utils.getCellArray
-import lukkon.Utils.getGridPane
 
 class GameOfLife : Application() {
 
@@ -29,14 +28,17 @@ class GameOfLife : Application() {
     override fun start(stage: Stage) {
         val x = 50
         val y = 50
-        val cellArray  = getCellArray(x, y)
+        val board = Board(x, y)
+
+        val holder = StackPane(board.canvas)
+        holder.style = "-fx-background-color: lightgrey"
 
         val nextBtn = Button("Next")
-        nextBtn.onAction = EventHandler{ next(cellArray) }
+        nextBtn.onAction = EventHandler{ next(board) }
         val resetBtn = Button("Reset")
-        resetBtn.onAction = EventHandler{ reset(cellArray) }
+        resetBtn.onAction = EventHandler{ reset(board) }
         val skipBtn = Button("Skip 10")
-        skipBtn.onAction = EventHandler{ skip(cellArray, 10) }
+        skipBtn.onAction = EventHandler{ skip(board, 10) }
 
         val rulesRegex = "^(?!.*(.).*\\1)[012345678]*\$".toRegex()
         val bornTextField = TextField("2")
@@ -77,7 +79,7 @@ class GameOfLife : Application() {
         hbox.spacing = 5.0
         hbox.padding = Insets(5.0)
         hbox.alignment = Pos.CENTER_LEFT
-        mainPane.center = ScrollPane(getGridPane(cellArray))
+        mainPane.center = ScrollPane(holder)
         mainPane.top = hbox
         val scene = Scene(mainPane,500.0,300.0)
         stage.scene = scene
@@ -85,35 +87,44 @@ class GameOfLife : Application() {
         stage.show()
     }
 
-    private fun next(cellArray: Array<Array<Cell>>){
-        if(updateCells(cellArray)){
+    private fun next(board: Board){
+        board.foreachCell { it.calculateNextState() }
+        if(updateCells(board)){
             counter.value++
         }
     }
 
-    private fun skip(cellArray: Array<Array<Cell>>, count: Int){
+    private fun skip(board: Board, count: Int){
         var steps = 0
-        while ((steps < count) && updateCells(cellArray)){
+        board.foreachCell { it.calculateNextState() }
+        while ((steps < count) && updateCells(board)){
+            board.foreachCell { it.calculateNextState() }
             steps++
         }
         counter.value += steps
     }
 
-    private fun reset(cellArray: Array<Array<Cell>>) {
-        cellArray.forEach { array -> array.forEach { it.reset() } }
+    private fun reset(board: Board) {
+        board.foreachCell { it.reset() }
+        updateCells(board)
         counter.value = 0
     }
 
-    private fun updateCells(cellArray: Array<Array<Cell>>): Boolean{
+    private fun updateCells(board: Board): Boolean{
         var changed = false
-        cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
-        cellArray.forEach { array -> array.forEach {
-            if (it.willChange()) {
-                it.updateState()
-                it.updateView()
+        val gc = board.canvas.graphicsContext2D
+        board.foreachCellIndexed { x, y, cell ->
+            if (cell.willChange()) {
+                cell.updateState()
+                cell.updateView()
+                gc.fill = cell.color
+                gc.fillRoundRect(
+                        x*(board.cellSize + board.spacing) + board.spacing,
+                        y*(board.cellSize + board.spacing) + board.spacing,
+                        board.cellSize, board.cellSize, board.arcSize, board.arcSize)
                 changed = true
             }
-        } }
+        }
         return changed
     }
 
