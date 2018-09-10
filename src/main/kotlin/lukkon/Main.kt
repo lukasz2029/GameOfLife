@@ -6,15 +6,18 @@ import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Scene
+import javafx.scene.canvas.Canvas
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
+import javafx.scene.layout.StackPane
 import javafx.stage.Stage
-import lukkon.Utils.getCellArray
-import lukkon.Utils.getGridPane
+import lukkon.Utils.size
+import lukkon.Utils.spacing
+import java.util.function.Supplier
 
 class GameOfLife : Application() {
 
@@ -29,14 +32,18 @@ class GameOfLife : Application() {
     override fun start(stage: Stage) {
         val x = 50
         val y = 50
-        val cellArray  = getCellArray(x, y)
+        val cellArray: Array<Array<Cell>> = Utils.getCellArray(Supplier { SimpleCell() }, x, y)
+
+        val canvas = Utils.getCanvas(cellArray)
+        val holder = StackPane(canvas)
+        holder.style = "-fx-background-color: lightgrey"
 
         val nextBtn = Button("Next")
-        nextBtn.onAction = EventHandler{ next(cellArray) }
+        nextBtn.onAction = EventHandler{ next(cellArray, canvas) }
         val resetBtn = Button("Reset")
-        resetBtn.onAction = EventHandler{ reset(cellArray) }
+        resetBtn.onAction = EventHandler{ reset(cellArray, canvas) }
         val skipBtn = Button("Skip 10")
-        skipBtn.onAction = EventHandler{ skip(cellArray, 10) }
+        skipBtn.onAction = EventHandler{ skip(cellArray, canvas, 10) }
 
         val rulesRegex = "^(?!.*(.).*\\1)[012345678]*\$".toRegex()
         val bornTextField = TextField("2")
@@ -77,7 +84,7 @@ class GameOfLife : Application() {
         hbox.spacing = 5.0
         hbox.padding = Insets(5.0)
         hbox.alignment = Pos.CENTER_LEFT
-        mainPane.center = ScrollPane(getGridPane(cellArray))
+        mainPane.center = ScrollPane(holder)
         mainPane.top = hbox
         val scene = Scene(mainPane,500.0,300.0)
         stage.scene = scene
@@ -85,32 +92,43 @@ class GameOfLife : Application() {
         stage.show()
     }
 
-    private fun next(cellArray: Array<Array<Cell>>){
-        if(updateCells(cellArray)){
+    private fun next(cellArray: Array<Array<Cell>>, canvas: Canvas){
+        cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+        if(updateCells(cellArray, canvas)){
             counter.value++
         }
     }
 
-    private fun skip(cellArray: Array<Array<Cell>>, count: Int){
+    private fun skip(cellArray: Array<Array<Cell>>, canvas: Canvas, count: Int){
         var steps = 0
-        while ((steps < count) && updateCells(cellArray)){
+        cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
+        while ((steps < count) && updateCells(cellArray, canvas)){
+            cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
             steps++
         }
         counter.value += steps
     }
 
-    private fun reset(cellArray: Array<Array<Cell>>) {
+    private fun reset(cellArray: Array<Array<Cell>>, canvas: Canvas) {
         cellArray.forEach { array -> array.forEach { it.reset() } }
+        updateCells(cellArray, canvas)
         counter.value = 0
     }
 
-    private fun updateCells(cellArray: Array<Array<Cell>>): Boolean{
+    private fun updateCells(cellArray: Array<Array<Cell>>, canvas: Canvas): Boolean{
         var changed = false
-        cellArray.forEach { array -> array.forEach { it.calculateNextState() } }
-        cellArray.forEach { array -> array.forEach {
-            if (it.willChange()) {
-                it.updateState()
-                it.updateView()
+        val gc = canvas.graphicsContext2D
+        cellArray.forEach { col -> col.forEach {cell ->
+            if (cell.willChange()) {
+                cell.updateState()
+                cell.updateView()
+                val x = cell.location!!.x
+                val y = cell.location!!.y
+                gc.fill = (cellArray[x][y] as SimpleCell).color
+                gc.fillRoundRect(
+                        x*(size + spacing) + spacing,
+                        y*(size + spacing) + spacing,
+                        size, size, 5.0, 5.0)
                 changed = true
             }
         } }
