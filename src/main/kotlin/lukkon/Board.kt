@@ -1,5 +1,6 @@
 package lukkon
 
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.scene.canvas.Canvas
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
@@ -13,6 +14,7 @@ class Board(width: Int,
 
     private val cellArray = Array(width) { _ -> Array(height){ SimpleCell() } }
     private val canvas = Canvas(width*(cellSize + spacing) + spacing, height*(cellSize + spacing) + spacing)
+    var counter = SimpleIntegerProperty(0)
 
     init {
         initCellArray(width)
@@ -65,7 +67,10 @@ class Board(width: Int,
     fun next(): Boolean {
         foreachCell { it.calculateNextState() }
         val changed = updateCells()
-        if (changed) { drawCells() }
+        if (changed) {
+            drawCells()
+            counter.value++
+        }
         return changed
     }
 
@@ -82,6 +87,7 @@ class Board(width: Int,
             }
         }
         if (draw){ drawCells() }
+        counter.value += steps
         return steps
     }
 
@@ -90,6 +96,7 @@ class Board(width: Int,
             it.reset()
             drawCell(it)
         }
+        counter.value = 0
     }
 
     private fun drawCells() {

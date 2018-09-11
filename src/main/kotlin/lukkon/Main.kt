@@ -21,19 +21,12 @@ class GameOfLife : Application() {
         fun main(args: Array<String>) {
             launch(GameOfLife::class.java)
         }
-        var counter = SimpleIntegerProperty(0)
     }
 
     override fun start(stage: Stage) {
         val board = Board(200, 200, 13.0, 1.0, 2.0)
         val boardAnimator = BoardAnimator(board)
 
-        val nextBtn = Button("Next")
-        nextBtn.onAction = EventHandler{
-            if (board.next()){
-                counter.value++
-            }
-        }
         val startStopBtn = Button("Start")
         startStopBtn.onAction = EventHandler{
             if (!boardAnimator.active){
@@ -43,18 +36,21 @@ class GameOfLife : Application() {
             }
             boardAnimator.startStop()
         }
+        val nextBtn = Button("Next")
+        nextBtn.onAction = EventHandler{
+            board.next()
+        }
         val skip10Btn = Button("Skip 10")
         skip10Btn.onAction = EventHandler{
-            counter.value += board.skip(10)
+            board.skip(10)
         }
         val skip100Btn = Button("Skip 100")
         skip100Btn.onAction = EventHandler{
-            counter.value += board.skip(100)
+            board.skip(100)
         }
         val resetBtn = Button("Reset")
         resetBtn.onAction = EventHandler{
             board.reset()
-            counter.value = 0
         }
 
         val rulesRegex = "^(?!.*(.).*\\1)[012345678]*\$".toRegex()
@@ -85,8 +81,8 @@ class GameOfLife : Application() {
             }
         }
 
-        val counterLabel = Label()
-        counter.addListener { _, _, newValue ->
+        val counterLabel = Label("0")
+        board.counter.addListener { _, _, newValue ->
             counterLabel.text = newValue.toString()
         }
 
