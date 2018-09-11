@@ -28,11 +28,7 @@ class GameOfLife : Application() {
 
         val startStopBtn = Button("Start")
         startStopBtn.onAction = EventHandler{
-            if (!boardAnimator.active){
-                startStopBtn.text = "Stop"
-            }else{
-                startStopBtn.text = "Start"
-            }
+            startStopBtn.text = if (!boardAnimator.active){ "Stop" } else { "Start" }
             boardAnimator.startStop()
         }
         val nextBtn = Button("Next")
@@ -93,7 +89,7 @@ class GameOfLife : Application() {
         hBox.alignment = Pos.CENTER_LEFT
         mainPane.center = ScrollPane(board)
         mainPane.top = hBox
-        val scene = Scene(mainPane,500.0,300.0)
+        val scene = Scene(mainPane,600.0,300.0)
         stage.scene = scene
         stage.title = "The game of life"
         stage.show()
