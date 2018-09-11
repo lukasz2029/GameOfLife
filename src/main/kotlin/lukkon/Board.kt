@@ -13,7 +13,7 @@ class Board(width: Int,
             private val spacing: Double = 2.0,
             private val arcSize: Double = 2.0): StackPane() {
 
-    private val cellArray = Array(width) { _ -> Array(height){ SimpleCell() } }
+    private val cellArray = Array(width) { _ -> Array(height){ Cell() } }
     private val canvas = Canvas(width*(cellSize + spacing) + spacing, height*(cellSize + spacing) + spacing)
     var counter = SimpleIntegerProperty(0)
     var newCellColor = Color.YELLOW!!
@@ -33,7 +33,7 @@ class Board(width: Int,
         }
     }
 
-    private fun initCell(x: Int, y: Int, cell: SimpleCell, width: Int){
+    private fun initCell(x: Int, y: Int, cell: Cell, width: Int){
         cell.location.x = x
         cell.location.y = y
         if (x > 0) {
@@ -110,7 +110,7 @@ class Board(width: Int,
         }
     }
 
-    private fun drawCell(cell: SimpleCell){
+    private fun drawCell(cell: Cell){
         cell.draw(canvas.graphicsContext2D, cellSize, spacing, arcSize)
     }
 
@@ -125,7 +125,7 @@ class Board(width: Int,
         return changed
     }
 
-    private inline fun foreachCell(action: (SimpleCell) -> Unit){
+    private inline fun foreachCell(action: (Cell) -> Unit){
         for (element in cellArray){
             for (cell in element){
                 action(cell)

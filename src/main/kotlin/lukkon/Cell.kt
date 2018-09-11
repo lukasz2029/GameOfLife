@@ -1,8 +1,10 @@
 package lukkon
 
+import javafx.scene.canvas.GraphicsContext
+import javafx.scene.paint.Color
 import java.awt.Point
 
-abstract class Cell{
+class Cell{
 
     companion object {
         var bornSet: Set<Short> = setOf(3)
@@ -12,6 +14,7 @@ abstract class Cell{
     var location: Point = Point()
     var state: Boolean = false
     var nextState: Boolean = false
+    var color= Color.YELLOW!!
 
     var NW: Cell? = null
     var N: Cell? = null
@@ -41,6 +44,14 @@ abstract class Cell{
     fun reset(){
         state = false
         nextState = false
+    }
+
+    fun draw(gc: GraphicsContext, cellSize: Double, spacing: Double, arcSize: Double) {
+        gc.fill = if (state) color else Color.GRAY
+        gc.fillRoundRect(
+                location.x*(cellSize + spacing) + spacing,
+                location.y*(cellSize + spacing) + spacing,
+                cellSize, cellSize, arcSize, arcSize)
     }
 
     private fun Boolean?.toInt() = if (this == true) 1 else 0
