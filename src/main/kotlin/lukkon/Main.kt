@@ -26,9 +26,7 @@ class GameOfLife : Application() {
     }
 
     override fun start(stage: Stage) {
-        val x = 50
-        val y = 50
-        val board = Board(x, y)
+        val board = Board(200, 200, 13.0, 1.0, 2.0)
 
         val holder = StackPane(board.canvas)
         holder.style = "-fx-background-color: lightgrey"
@@ -88,44 +86,40 @@ class GameOfLife : Application() {
     }
 
     private fun next(board: Board){
-        board.foreachCell { it.calculateNextState() }
-        if(updateCells(board)){
+        board.foreachCell {
+            it.calculateNextState()
+        }
+        if(board.updateCells()){
             counter.value++
         }
     }
 
     private fun skip(board: Board, count: Int){
         var steps = 0
-        board.foreachCell { it.calculateNextState() }
-        while ((steps < count) && updateCells(board)){
-            board.foreachCell { it.calculateNextState() }
-            steps++
+        var draw = false
+        var changed = true
+        while ((steps < count) && changed){
+            board.foreachCell {
+                it.calculateNextState()
+            }
+            changed = board.updateCells()
+            if (changed) {
+                draw = true
+                steps++
+            }
+        }
+        if (draw){
+            board.drawCells()
         }
         counter.value += steps
     }
 
     private fun reset(board: Board) {
-        board.foreachCell { it.reset() }
-        updateCells(board)
-        counter.value = 0
-    }
-
-    private fun updateCells(board: Board): Boolean{
-        var changed = false
-        val gc = board.canvas.graphicsContext2D
-        board.foreachCellIndexed { x, y, cell ->
-            if (cell.willChange()) {
-                cell.updateState()
-                cell.updateView()
-                gc.fill = cell.color
-                gc.fillRoundRect(
-                        x*(board.cellSize + board.spacing) + board.spacing,
-                        y*(board.cellSize + board.spacing) + board.spacing,
-                        board.cellSize, board.cellSize, board.arcSize, board.arcSize)
-                changed = true
-            }
+        board.foreachCell {
+            it.reset()
+            board.drawCell(it)
         }
-        return changed
+        counter.value = 0
     }
 
 }

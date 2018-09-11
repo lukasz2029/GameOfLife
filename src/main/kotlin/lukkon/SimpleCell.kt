@@ -1,10 +1,16 @@
 package lukkon
 
+import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
 
 class SimpleCell: Cell() {
-    var color = Color.GRAY!!
-    override fun updateView() {
-        color = if (state) Color.YELLOW else Color.GRAY
+
+    fun draw(gc: GraphicsContext, cellSize: Double, spacing: Double, arcSize: Double) {
+        gc.fill = if (state) Color.YELLOW else Color.GRAY
+        gc.fillRoundRect(
+                location.x*(cellSize + spacing) + spacing,
+                location.y*(cellSize + spacing) + spacing,
+                cellSize, cellSize, arcSize, arcSize)
     }
+
 }

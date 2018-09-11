@@ -42,29 +42,36 @@ class Board(width: Int,
     }
 
     private fun initCanvas() {
-        val gc = canvas.graphicsContext2D
-
         canvas.setOnMouseClicked {
             if (it.eventType == MouseEvent.MOUSE_CLICKED && it.button == MouseButton.PRIMARY){
                 val x = Math.ceil(it.x/(cellSize + spacing)).toInt() - 1
                 val y = Math.ceil(it.y/(cellSize + spacing)).toInt() - 1
                 cellArray[x][y].state = !cellArray[x][y].state
-                cellArray[x][y].updateView()
-                gc.fill = (cellArray[x][y]).color
-                gc.fillRoundRect(
-                        x*(cellSize + spacing) + spacing,
-                        y*(cellSize + spacing) + spacing,
-                        cellSize, cellSize, arcSize, arcSize)
+                drawCell(cellArray[x][y])
             }
         }
+        drawCells()
+    }
 
-        foreachCellIndexed { x, y, cell ->
-            gc.fill = cell.color
-            gc.fillRoundRect(
-                    x*(cellSize + spacing) + spacing,
-                    y*(cellSize + spacing) + spacing,
-                    cellSize, cellSize, 5.0, 5.0)
+    fun drawCells() {
+        foreachCell {
+            it.draw(canvas.graphicsContext2D, cellSize, spacing, arcSize)
         }
+    }
+
+    fun drawCell(cell: SimpleCell){
+        cell.draw(canvas.graphicsContext2D, cellSize, spacing, arcSize)
+    }
+
+    fun updateCells(): Boolean{
+        var changed = false
+        foreachCell {
+            if (it.willChange()) {
+                it.updateState()
+                changed = true
+            }
+        }
+        return changed
     }
 
     inline fun foreachCell(action: (SimpleCell) -> Unit){
@@ -75,7 +82,7 @@ class Board(width: Int,
         }
     }
 
-    inline fun foreachCellIndexed(action: (x: Int, y: Int, SimpleCell) -> Unit){
+    private inline fun foreachCellIndexed(action: (x: Int, y: Int, SimpleCell) -> Unit){
         for ((x, array) in cellArray.withIndex()) {
             for ((y, cell) in array.withIndex()) {
                 action(x, y, cell)

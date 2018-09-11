@@ -34,13 +34,12 @@ abstract class Cell{
         state = nextState
     }
 
-    abstract fun updateView()
-
     fun willChange(): Boolean{
         return state != nextState
     }
 
     fun reset(){
+        state = false
         nextState = false
     }
 
