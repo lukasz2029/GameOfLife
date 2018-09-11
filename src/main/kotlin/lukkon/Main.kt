@@ -12,7 +12,6 @@ import javafx.scene.control.ScrollPane
 import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
-import javafx.scene.layout.StackPane
 import javafx.stage.Stage
 
 class GameOfLife : Application() {
@@ -28,15 +27,21 @@ class GameOfLife : Application() {
     override fun start(stage: Stage) {
         val board = Board(200, 200, 13.0, 1.0, 2.0)
 
-        val holder = StackPane(board.canvas)
-        holder.style = "-fx-background-color: lightgrey"
-
         val nextBtn = Button("Next")
-        nextBtn.onAction = EventHandler{ next(board) }
+        nextBtn.onAction = EventHandler{
+            if (board.next()){
+                counter.value++
+            }
+        }
         val resetBtn = Button("Reset")
-        resetBtn.onAction = EventHandler{ reset(board) }
+        resetBtn.onAction = EventHandler{
+            board.reset()
+            counter.value = 0
+        }
         val skipBtn = Button("Skip 10")
-        skipBtn.onAction = EventHandler{ skip(board, 10) }
+        skipBtn.onAction = EventHandler{
+            counter.value += board.skip(10)
+        }
 
         val rulesRegex = "^(?!.*(.).*\\1)[012345678]*\$".toRegex()
         val bornTextField = TextField("2")
@@ -72,54 +77,17 @@ class GameOfLife : Application() {
         }
 
         val mainPane = BorderPane()
-        val hbox = HBox(nextBtn, skipBtn, resetBtn, Label("B:"), bornTextField, Label("S:"), surviveTextField,
+        val hBox = HBox(nextBtn, skipBtn, resetBtn, Label("B:"), bornTextField, Label("S:"), surviveTextField,
                 counterLabel)
-        hbox.spacing = 5.0
-        hbox.padding = Insets(5.0)
-        hbox.alignment = Pos.CENTER_LEFT
-        mainPane.center = ScrollPane(holder)
-        mainPane.top = hbox
+        hBox.spacing = 5.0
+        hBox.padding = Insets(5.0)
+        hBox.alignment = Pos.CENTER_LEFT
+        mainPane.center = ScrollPane(board)
+        mainPane.top = hBox
         val scene = Scene(mainPane,500.0,300.0)
         stage.scene = scene
         stage.title = "The game of life"
         stage.show()
-    }
-
-    private fun next(board: Board){
-        board.foreachCell {
-            it.calculateNextState()
-        }
-        if(board.updateCells()){
-            counter.value++
-        }
-    }
-
-    private fun skip(board: Board, count: Int){
-        var steps = 0
-        var draw = false
-        var changed = true
-        while ((steps < count) && changed){
-            board.foreachCell {
-                it.calculateNextState()
-            }
-            changed = board.updateCells()
-            if (changed) {
-                draw = true
-                steps++
-            }
-        }
-        if (draw){
-            board.drawCells()
-        }
-        counter.value += steps
-    }
-
-    private fun reset(board: Board) {
-        board.foreachCell {
-            it.reset()
-            board.drawCell(it)
-        }
-        counter.value = 0
     }
 
 }

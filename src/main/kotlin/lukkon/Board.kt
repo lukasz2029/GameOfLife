@@ -3,40 +3,49 @@ package lukkon
 import javafx.scene.canvas.Canvas
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
+import javafx.scene.layout.StackPane
 
 class Board(width: Int,
             height: Int,
-            val cellSize: Double = 15.0,
-            val spacing: Double = 2.0,
-            val arcSize: Double = 2.0) {
+            private val cellSize: Double = 15.0,
+            private val spacing: Double = 2.0,
+            private val arcSize: Double = 2.0): StackPane() {
 
-    val cellArray = Array(width) { _ -> Array(height){ SimpleCell() } }
-    val canvas = Canvas(width*(cellSize + spacing) + spacing, height*(cellSize + spacing) + spacing)
+    private val cellArray = Array(width) { _ -> Array(height){ SimpleCell() } }
+    private val canvas = Canvas(width*(cellSize + spacing) + spacing, height*(cellSize + spacing) + spacing)
 
     init {
         initCellArray(width)
         initCanvas()
+        children.add(canvas)
+        style = "-fx-background-color: lightgrey"
     }
 
     private fun initCellArray(width: Int){
-        foreachCellIndexed { x, y, cell ->
-            cell.location.x = x
-            cell.location.y = y
-            if (x > 0) {
-                cell.W = cellArray[x - 1][y]
-                cellArray[x - 1][y].E = cell
+        for ((x, array) in cellArray.withIndex()) {
+            for ((y, cell) in array.withIndex()) {
+                initCell(x, y, cell, width)
             }
-            if (y > 0) {
-                cell.N = cellArray[x][y - 1]
-                cellArray[x][y - 1].S = cell
-                if (x > 0) {
-                    cell.NW = cellArray[x - 1][y - 1]
-                    cellArray[x - 1][y - 1].SE = cell
-                }
-                if (x < width - 1) {
-                    cell.NE = cellArray[x + 1][y - 1]
-                    cellArray[x + 1][y - 1].SW = cell
-                }
+        }
+    }
+
+    private fun initCell(x: Int, y: Int, cell: SimpleCell, width: Int){
+        cell.location.x = x
+        cell.location.y = y
+        if (x > 0) {
+            cell.W = cellArray[x - 1][y]
+            cellArray[x - 1][y].E = cell
+        }
+        if (y > 0) {
+            cell.N = cellArray[x][y - 1]
+            cellArray[x][y - 1].S = cell
+            if (x > 0) {
+                cell.NW = cellArray[x - 1][y - 1]
+                cellArray[x - 1][y - 1].SE = cell
+            }
+            if (x < width - 1) {
+                cell.NE = cellArray[x + 1][y - 1]
+                cellArray[x + 1][y - 1].SW = cell
             }
         }
     }
@@ -53,17 +62,47 @@ class Board(width: Int,
         drawCells()
     }
 
-    fun drawCells() {
+    fun next(): Boolean {
+        foreachCell { it.calculateNextState() }
+        val changed = updateCells()
+        if (changed) { drawCells() }
+        return changed
+    }
+
+    fun skip(count: Int): Int{
+        var steps = 0
+        var draw = false
+        var changed = true
+        while ((steps < count) && changed){
+            foreachCell { it.calculateNextState() }
+            changed = updateCells()
+            if (changed) {
+                draw = true
+                steps++
+            }
+        }
+        if (draw){ drawCells() }
+        return steps
+    }
+
+    fun reset() {
+        foreachCell {
+            it.reset()
+            drawCell(it)
+        }
+    }
+
+    private fun drawCells() {
         foreachCell {
             it.draw(canvas.graphicsContext2D, cellSize, spacing, arcSize)
         }
     }
 
-    fun drawCell(cell: SimpleCell){
+    private fun drawCell(cell: SimpleCell){
         cell.draw(canvas.graphicsContext2D, cellSize, spacing, arcSize)
     }
 
-    fun updateCells(): Boolean{
+    private fun updateCells(): Boolean{
         var changed = false
         foreachCell {
             if (it.willChange()) {
@@ -74,18 +113,10 @@ class Board(width: Int,
         return changed
     }
 
-    inline fun foreachCell(action: (SimpleCell) -> Unit){
+    private inline fun foreachCell(action: (SimpleCell) -> Unit){
         for (element in cellArray){
             for (cell in element){
                 action(cell)
-            }
-        }
-    }
-
-    private inline fun foreachCellIndexed(action: (x: Int, y: Int, SimpleCell) -> Unit){
-        for ((x, array) in cellArray.withIndex()) {
-            for ((y, cell) in array.withIndex()) {
-                action(x, y, cell)
             }
         }
     }
