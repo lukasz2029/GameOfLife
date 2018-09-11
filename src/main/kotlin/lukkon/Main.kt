@@ -38,9 +38,18 @@ class GameOfLife : Application() {
             board.reset()
             counter.value = 0
         }
-        val skipBtn = Button("Skip 10")
-        skipBtn.onAction = EventHandler{
+        val skip10Btn = Button("Skip 10")
+        skip10Btn.onAction = EventHandler{
             counter.value += board.skip(10)
+        }
+        val skip100Btn = Button("Skip 100")
+        skip100Btn.onAction = EventHandler{
+            counter.value += board.skip(100)
+        }
+        val resetBtn = Button("Reset")
+        resetBtn.onAction = EventHandler{
+            board.reset()
+            counter.value = 0
         }
 
         val rulesRegex = "^(?!.*(.).*\\1)[012345678]*\$".toRegex()
@@ -77,7 +86,7 @@ class GameOfLife : Application() {
         }
 
         val mainPane = BorderPane()
-        val hBox = HBox(nextBtn, skipBtn, resetBtn, Label("B:"), bornTextField, Label("S:"), surviveTextField,
+        val hBox = HBox(nextBtn, skip10Btn, skip100Btn, resetBtn, Label("B:"), bornTextField, Label("S:"), surviveTextField,
                 counterLabel)
         hBox.spacing = 5.0
         hBox.padding = Insets(5.0)
