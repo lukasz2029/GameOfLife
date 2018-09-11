@@ -5,6 +5,7 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.StackPane
+import javafx.scene.paint.Color
 
 class Board(width: Int,
             height: Int,
@@ -15,6 +16,7 @@ class Board(width: Int,
     private val cellArray = Array(width) { _ -> Array(height){ SimpleCell() } }
     private val canvas = Canvas(width*(cellSize + spacing) + spacing, height*(cellSize + spacing) + spacing)
     var counter = SimpleIntegerProperty(0)
+    var newCellColor = Color.YELLOW!!
 
     init {
         initCellArray(width)
@@ -58,6 +60,9 @@ class Board(width: Int,
                 val x = Math.ceil(it.x/(cellSize + spacing)).toInt() - 1
                 val y = Math.ceil(it.y/(cellSize + spacing)).toInt() - 1
                 cellArray[x][y].state = !cellArray[x][y].state
+                if(cellArray[x][y].state){
+                    cellArray[x][y].color = newCellColor
+                }
                 drawCell(cellArray[x][y])
             }
         }

@@ -11,6 +11,7 @@ import javafx.scene.control.ScrollPane
 import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
+import javafx.scene.paint.Color
 import javafx.stage.Stage
 
 class GameOfLife : Application() {
@@ -47,6 +48,36 @@ class GameOfLife : Application() {
         resetBtn.onAction = EventHandler{
             board.reset()
         }
+        val redBtn = Button("  ")
+        redBtn.style = "-fx-background-color: red"
+        redBtn.onAction = EventHandler{
+            board.newCellColor = Color.RED
+        }
+        val greenBtn = Button("  ")
+        greenBtn.style = "-fx-background-color: green"
+        greenBtn.onAction = EventHandler{
+            board.newCellColor = Color.GREEN
+        }
+        val blueBtn = Button("  ")
+        blueBtn.style = "-fx-background-color: blue"
+        blueBtn.onAction = EventHandler{
+            board.newCellColor = Color.BLUE
+        }
+        val yellowBtn = Button("  ")
+        yellowBtn.style = "-fx-background-color: yellow"
+        yellowBtn.onAction = EventHandler{
+            board.newCellColor = Color.YELLOW
+        }
+        val whiteBtn = Button("  ")
+        whiteBtn.style = "-fx-background-color: white"
+        whiteBtn.onAction = EventHandler{
+            board.newCellColor = Color.WHITE
+        }
+        val blackBtn = Button("  ")
+        blackBtn.style = "-fx-background-color: black"
+        blackBtn.onAction = EventHandler{
+            board.newCellColor = Color.BLACK
+        }
 
         val rulesRegex = "^(?!.*(.).*\\1)[012345678]*\$".toRegex()
         val bornTextField = TextField("2")
@@ -82,7 +113,7 @@ class GameOfLife : Application() {
         }
 
         val mainPane = BorderPane()
-        val hBox = HBox(startStopBtn, nextBtn, skip10Btn, skip100Btn, resetBtn, Label("B:"), bornTextField, Label("S:"), surviveTextField,
+        val hBox = HBox(startStopBtn, nextBtn, skip10Btn, skip100Btn, resetBtn, Label("B:"), redBtn, greenBtn, blueBtn, yellowBtn, whiteBtn, blackBtn, bornTextField, Label("S:"), surviveTextField,
                 counterLabel)
         hBox.spacing = 5.0
         hBox.padding = Insets(5.0)
