@@ -26,6 +26,7 @@ class GameOfLife : Application() {
 
     override fun start(stage: Stage) {
         val board = Board(200, 200, 13.0, 1.0, 2.0)
+        val boardAnimator = BoardAnimator(board)
 
         val nextBtn = Button("Next")
         nextBtn.onAction = EventHandler{
@@ -33,10 +34,14 @@ class GameOfLife : Application() {
                 counter.value++
             }
         }
-        val resetBtn = Button("Reset")
-        resetBtn.onAction = EventHandler{
-            board.reset()
-            counter.value = 0
+        val startStopBtn = Button("Start")
+        startStopBtn.onAction = EventHandler{
+            if (!boardAnimator.active){
+                startStopBtn.text = "Stop"
+            }else{
+                startStopBtn.text = "Start"
+            }
+            boardAnimator.startStop()
         }
         val skip10Btn = Button("Skip 10")
         skip10Btn.onAction = EventHandler{
@@ -86,7 +91,7 @@ class GameOfLife : Application() {
         }
 
         val mainPane = BorderPane()
-        val hBox = HBox(nextBtn, skip10Btn, skip100Btn, resetBtn, Label("B:"), bornTextField, Label("S:"), surviveTextField,
+        val hBox = HBox(startStopBtn, nextBtn, skip10Btn, skip100Btn, resetBtn, Label("B:"), bornTextField, Label("S:"), surviveTextField,
                 counterLabel)
         hBox.spacing = 5.0
         hBox.padding = Insets(5.0)
