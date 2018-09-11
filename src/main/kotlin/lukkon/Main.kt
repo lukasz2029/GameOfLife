@@ -1,7 +1,6 @@
 package lukkon
 
 import javafx.application.Application
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -81,9 +80,9 @@ class GameOfLife : Application() {
             }
         }
 
-        val counterLabel = Label("0")
+        val counterLabel = Label("Step: 0")
         board.counter.addListener { _, _, newValue ->
-            counterLabel.text = newValue.toString()
+            counterLabel.text = "Step: $newValue"
         }
 
         val mainPane = BorderPane()
