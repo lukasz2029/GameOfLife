@@ -15,6 +15,7 @@ class Cell{
     var state: Boolean = false
     var nextState: Boolean = false
     var color= Color.YELLOW!!
+    var nextColor= Color.YELLOW!!
 
     var NW: Cell? = null
     var N: Cell? = null
@@ -31,10 +32,14 @@ class Cell{
                 W?.state.toInt() + E?.state.toInt() +
                 SW?.state.toInt() + S?.state.toInt() + SE?.state.toInt()).toShort()
         nextState = (!state && bornSet.contains(sum)) || (state && surviveSet.contains(sum))
+        if (willChange() && nextState){
+            nextColor = ColorCalculator(this, sum.toDouble()).color
+        }
     }
 
     fun updateState(){
         state = nextState
+        color = nextColor
     }
 
     fun willChange(): Boolean{

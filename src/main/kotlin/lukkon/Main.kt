@@ -113,14 +113,14 @@ class GameOfLife : Application() {
         }
 
         val mainPane = BorderPane()
-        val hBox = HBox(startStopBtn, nextBtn, skip10Btn, skip100Btn, resetBtn, Label("B:"), redBtn, greenBtn, blueBtn, yellowBtn, whiteBtn, blackBtn, bornTextField, Label("S:"), surviveTextField,
+        val hBox = HBox(startStopBtn, nextBtn, skip10Btn, skip100Btn, resetBtn, redBtn, greenBtn, blueBtn, yellowBtn, whiteBtn, blackBtn, Label("B:"), bornTextField, Label("S:"), surviveTextField,
                 counterLabel)
         hBox.spacing = 5.0
         hBox.padding = Insets(5.0)
         hBox.alignment = Pos.CENTER_LEFT
         mainPane.center = ScrollPane(board)
         mainPane.top = hBox
-        val scene = Scene(mainPane,600.0,300.0)
+        val scene = Scene(mainPane,800.0,600.0)
         stage.scene = scene
         stage.title = "The game of life"
         stage.show()
